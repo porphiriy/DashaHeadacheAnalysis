@@ -1,0 +1,52 @@
+---
+title: "Dasha Headache Analysis"
+output:
+  pdf_document
+  # html_document:
+  #   css: styles.css
+date: "2024-01-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(openxlsx)        
+require(data.table)        
+require(corrplot)        
+require(dplyr)        
+require(broom)        
+require(sjPlot)        
+```
+
+## Correlation plot
+
+```{r data loading, echo=FALSE, fig.height=8, out.width='100%'}
+dt <- read.xlsx("Copy of Дослідження мігрені.xlsx", sheet = 2, na.strings = 0)
+
+dt <- as.data.table(dt)
+
+dt <- 
+dt %>%
+  select(!c(date, `Krov./.stomatoloh.i.t.p.`, Antymihren, Zolm..sprei, `Mahne.V6./.vit.D`, Bifren, Prypys.vid.nevroloha, Inshi.liky)) 
+
+corDT <- dt %>% 
+  cor(method = "spearman")
+
+corrplot(corDT, tl.cex = .6, method = "color", addCoef.col = "black", type = "lower", 
+         number.cex = 0.5, diag = F)
+cat("\n\n")
+cat("\n\n")
+```
+
+## Including Plots
+
+
+```{r cor, fig.width=18, echo=FALSE}
+headAcheCauseModel <- glm(Holovnyi.bil ~., family = "binomial", data = dt)
+```
+
+
+
+```{r model, echo=FALSE}
+tab_model(headAcheCauseModel)
+```
+
