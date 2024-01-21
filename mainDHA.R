@@ -10,6 +10,26 @@ dt <- read.xlsx("HeadacheStudy.xlsx", sheet = 2, na.strings = 0)
 
 dt <- as.data.table(dt)
 
+corShift <- function(data = dt, y = "Holovnyi.bil", x = dt %>% select(!c(date, Holovnyi.bil)) %>% names, shifts = 0:5) {
+  l <- list()
+  # bitVec <- rep(NA, length(data[[y]]) - max(shifts))
+  # bitVec <- rep(NA, length(data[[y]]))
+  bitVec <- rep(NA, max(shifts))
+  shiftWindow <- rep(1, length(data[[y]]))
+  shiftWindow <- c(bitVec, shiftWindow)
+  for (sh in shifts) {
+    # sh=0
+    shiftWindow <- lead(shiftWindow, sh)
+    l[[sh]] <- numeric()
+    for (x0 in x) {
+      data[[x0]] shiftWindow
+      l[[sh]] <- c(l[[sh]], cor(data[[y]], data[[x0]], method = "spearman", use = "pairwise.complete.obs"))
+    }
+  }
+}
+headAche <- dt[, Holovnyi.bil]
+
+
 dt <- 
 dt %>%
   select(!c(date, `Krov./.stomatoloh.i.t.p.`, Antymihren, Zolm..sprei, `Mahne.V6./.vit.D`, Bifren, Prypys.vid.nevroloha, Inshi.liky)) 
@@ -39,6 +59,7 @@ tab_model(headAcheCauseModel)
 
 # ggplot
 # Melt the correlation matrix
+melted_cor_matrix <- melt(corDT)
 upper_triangle <- melted_cor_matrix[upper.tri(corDT), ]
 
 # Create the correlation plot
